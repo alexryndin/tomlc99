@@ -26,7 +26,7 @@
 #define TOML_H
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4996)
+#pragma warning(disable : 4996)
 #endif
 
 #include <stdint.h>
@@ -38,6 +38,17 @@
 #define TOML_EXTERN extern
 #endif
 
+enum toml_err_t {
+  TOML_OK = 0,
+  TOML_OOM = -1,
+  TOML_INTERNAL = -2,
+  TOML_EXTERNAL = -3,
+  TOML_SYNTAX = -4,
+  TOML_BADKEY = -5,
+  TOML_KEYEXISTS = -6,
+  TOML_FORBID = -7,
+};
+
 typedef struct toml_timestamp_t toml_timestamp_t;
 typedef struct toml_table_t toml_table_t;
 typedef struct toml_array_t toml_array_t;
@@ -46,14 +57,13 @@ typedef struct toml_datum_t toml_datum_t;
 /* Parse a file. Return a table on success, or 0 otherwise.
  * Caller must toml_free(the-return-value) after use.
  */
-TOML_EXTERN toml_table_t *toml_parse_file(FILE *fp, char *errbuf, int errbufsz);
+TOML_EXTERN toml_table_t *toml_parse_file(FILE *fp, int *err);
 
 /* Parse a string containing the full config.
  * Return a table on success, or 0 otherwise.
  * Caller must toml_free(the-return-value) after use.
  */
-TOML_EXTERN toml_table_t *toml_parse(char *conf, /* NUL terminated, please. */
-                                     char *errbuf, int errbufsz);
+TOML_EXTERN toml_table_t *toml_parse(char *conf, int *err);
 
 /* Free the table returned by toml_parse() or toml_parse_file(). Once
  * this function is called, any handles accessed through this tab
@@ -109,19 +119,19 @@ TOML_EXTERN const char *toml_key_in(const toml_table_t *tab, int keyidx);
 /* ... returns 1 if key exists in tab, 0 otherwise */
 TOML_EXTERN int toml_key_exists(const toml_table_t *tab, const char *key);
 /* ... retrieve values using key. */
-TOML_EXTERN toml_datum_t toml_string_in(const toml_table_t *arr,
-                                        const char *key);
+TOML_EXTERN toml_datum_t
+toml_string_in(const toml_table_t *arr, const char *key);
 TOML_EXTERN toml_datum_t toml_bool_in(const toml_table_t *arr, const char *key);
 TOML_EXTERN toml_datum_t toml_int_in(const toml_table_t *arr, const char *key);
-TOML_EXTERN toml_datum_t toml_double_in(const toml_table_t *arr,
-                                        const char *key);
-TOML_EXTERN toml_datum_t toml_timestamp_in(const toml_table_t *arr,
-                                           const char *key);
+TOML_EXTERN toml_datum_t
+toml_double_in(const toml_table_t *arr, const char *key);
+TOML_EXTERN toml_datum_t
+toml_timestamp_in(const toml_table_t *arr, const char *key);
 /* .. retrieve array or table using key. */
-TOML_EXTERN toml_array_t *toml_array_in(const toml_table_t *tab,
-                                        const char *key);
-TOML_EXTERN toml_table_t *toml_table_in(const toml_table_t *tab,
-                                        const char *key);
+TOML_EXTERN toml_array_t *
+toml_array_in(const toml_table_t *tab, const char *key);
+TOML_EXTERN toml_table_t *
+toml_table_in(const toml_table_t *tab, const char *key);
 
 /*-----------------------------------------------------------------
  * lesser used
@@ -155,8 +165,8 @@ TOML_EXTERN const char *toml_table_key(const toml_table_t *tab);
  */
 TOML_EXTERN int toml_utf8_to_ucs(const char *orig, int len, int64_t *ret);
 TOML_EXTERN int toml_ucs_to_utf8(int64_t code, char buf[6]);
-TOML_EXTERN void toml_set_memutil(void *(*xxmalloc)(size_t),
-                                  void (*xxfree)(void *));
+TOML_EXTERN void
+toml_set_memutil(void *(*xxmalloc)(size_t), void (*xxfree)(void *));
 
 /*--------------------------------------------------------------
  *  deprecated
